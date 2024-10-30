@@ -1,19 +1,41 @@
 import pandas as pd
 from datetime import datetime
+import re
 
 class TimetableAgent:
     def __init__(self, csv_path="c:/workspace/mwtuni/data/lukkari.csv"):
         try:
-            # Ladataan CSV-tiedosto ilman ylimääräisiä rivejä
-            self.df = pd.read_csv(csv_path, delimiter=";", encoding="latin1")
+            # Ladataan tiedosto utf-8 -koodauksella
+            self.df = pd.read_csv(csv_path, delimiter=";", encoding="utf-8")
             self.df.columns = [col.strip() for col in self.df.columns]  # Puhdistetaan sarakenimet
-            print("Loaded columns:", self.df.columns)  # Tulostetaan sarakenimet tarkistusta varten
 
             # Uudelleennimetään sarakkeet, jos niissä on erikoismerkkejä
             expected_columns = {"Viikko": "Week", "Päivä": "Day", "Pvm": "Pvm", "Aika": "Aika", 
                                 "Kurssi": "Kurssi", "Tila": "Tila", "Tiimi": "Team", "Opettaja": "Teacher"}
             self.df.rename(columns=expected_columns, inplace=True)
 
+            # Korvataan yleisimmät puuttuvat merkit niiden oikeilla vastineilla
+            def replace_special_chars(text):
+                text = str(text)
+                replacements = {
+                    'Ã¤': 'ä',
+                    'Ã¶': 'ö',
+                    'Ã…': 'Å',
+                    'Ã©': 'é',
+                    'Ã¸': 'ø',
+                    'â€“': '-',
+                    'â€': '"',
+                    'â€™': "'"
+                }
+                for old, new in replacements.items():
+                    text = text.replace(old, new)
+                return text
+            
+            # Puhdistetaan tekstit kaikista tarvittavista sarakkeista
+            for column in ["Kurssi", "Tila", "Opettaja"]:
+                if column in self.df.columns:
+                    self.df[column] = self.df[column].apply(replace_special_chars)
+                    
         except Exception as e:
             print(f"Error loading timetable CSV: {e}")
             self.df = None
