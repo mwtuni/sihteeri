@@ -1,16 +1,16 @@
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
-from agents import Agents 
+from manager import Manager 
 from chatgpt import interpret_prompt  # Tuodaan interpret_prompt chatgpt.py:stä
 
 app = Flask(__name__)
 
-agents = Agents()
+manager = Manager()
 
 # System-prompt definition: instructs ChatGPT API to interpret user prompt
 def generate_system_prompt():
-    agents_list = "\n".join([f"{i+1}. {agent['name']} - {agent['description']}" for i, agent in enumerate(agents.get_agents_list())])
+    agents_list = "\n".join([f"{i+1}. {agent['name']} - {agent['description']}" for i, agent in enumerate(manager.get_agents_list())])
     system_prompt = f"""
 Olet Sihteerin avustaja, joka osaa käyttää seuraavia agentteja:
 {agents_list}
@@ -44,7 +44,7 @@ def whatsapp_reply():
     response_text = ""
 
     if incoming_msg == "list_agents":
-        agents_list = agents.get_agents_list()
+        agents_list = manager.get_agents_list()
         response_text = "Käytettävissä olevat agentit:\n" + "\n".join([f"{agent['name']} - {agent['description']}" for agent in agents_list])
         response = MessagingResponse()
         response.message(response_text)

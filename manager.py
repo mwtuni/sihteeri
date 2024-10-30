@@ -1,6 +1,6 @@
 from agents.timetable import TimetableAgent
 
-class Agents:
+class Manager:
     def __init__(self):
         self.timetable_agent = TimetableAgent()
         self.agents = [
@@ -12,8 +12,7 @@ class Agents:
             {"name": "sms_agent", "description": "SMS-viestien lähetys"},
             {"name": "weather_agent", "description": "säätietojen hakeminen"},
             {"name": "moodle_agent", "description": "Moodlen kurssimateriaalien hallinta"},
-            {"name": "calendar_agent", "description": 
-            {"name": "timetable_agent", "description": "lukujärjestyksen käsittely"}kalenteritapahtumien hallinta"}
+            {"name": "timetable_agent", "description": "lukujärjestyksen käsittely"}
         ]
 
     def get_agents_list(self):
