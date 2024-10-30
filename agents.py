@@ -1,5 +1,8 @@
+from agents.timetable import TimetableAgent
+
 class Agents:
     def __init__(self):
+        self.timetable_agent = TimetableAgent()
         self.agents = [
             {"name": "vlm_agent", "description": "vision language model kuvien tulkitsemiseen"},
             {"name": "llm_agent", "description": "luonnollisen kielen käsittely"},
@@ -9,8 +12,13 @@ class Agents:
             {"name": "sms_agent", "description": "SMS-viestien lähetys"},
             {"name": "weather_agent", "description": "säätietojen hakeminen"},
             {"name": "moodle_agent", "description": "Moodlen kurssimateriaalien hallinta"},
-            {"name": "calendar_agent", "description": "kalenteritapahtumien hallinta"}
+            {"name": "calendar_agent", "description": 
+            {"name": "timetable_agent", "description": "lukujärjestyksen käsittely"}kalenteritapahtumien hallinta"}
         ]
 
     def get_agents_list(self):
         return self.agents
+
+    def get_agent_by_name(self, name):
+        if name == "timetable_agent":
+            return self.timetable_agent
