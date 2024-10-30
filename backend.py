@@ -3,6 +3,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 import requests
 from manager import Manager 
 from chatgpt import interpret_prompt  # Tuodaan interpret_prompt chatgpt.py:stä
+import json
 
 app = Flask(__name__)
 
@@ -54,17 +55,39 @@ def whatsapp_reply():
         return SYSTEM_PROMPT, 200
 
     else:
+        print("Processing user prompt:", incoming_msg)
         try:
-
             # Interpret user prompt with ChatGPT API
-            response_text = interpret_prompt(incoming_msg, SYSTEM_PROMPT)
+            task_list = json.loads(interpret_prompt(incoming_msg, SYSTEM_PROMPT))
+            print("Task list:", task_list)
+            
+            # Käydään läpi tehtävät JSON-tehtävälistasta ja suoritetaan agentin kutsu
+            for task in task_list.get("tasks", []):
+                agent_name = task["agent"]
+                instructions = task["instructions"]
+                
+                # Hakee agentin nimen perusteella
+                print("Looking for agent by name: ", agent_name)
+                agent = manager.get_agent_by_name(agent_name)
+                
+                if agent:
+
+                    if agent_name == "timetable_agent":
+                        print("Getting next class info")
+                        response_text = agent.get_next_class()  # timetable_agent hakee seuraavan luennon
+                        print("Response from agent:", response_text)
+                        break
+                else:
+                    response_text = f"Agent {agent_name} ei ole tuettu."
+
         except Exception as e:
             response_text = f"Error processing your prompt: {str(e)}"
 
         # Twilio response        
         response = MessagingResponse()
-        response.message(response_text)
+        response.message(response_text)  # Vain agentin palauttama teksti palautetaan käyttäjälle
         return str(response)
+
 
 def print_public_ip():
     try:
