@@ -2,6 +2,8 @@ import pandas as pd
 from datetime import datetime
 
 class TimetableAgent:
+    description = "Handles timetable queries."
+
     def __init__(self, csv_path="c:/workspace/mwtuni/data/lukkari.csv"):
         """
         Initializes the TimetableAgent by loading and preparing timetable data from a CSV file.
