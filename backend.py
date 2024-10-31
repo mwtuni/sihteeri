@@ -1,3 +1,4 @@
+
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
@@ -60,23 +61,34 @@ def whatsapp_reply():
             # Interpret user prompt with ChatGPT API
             task_list = json.loads(interpret_prompt(incoming_msg, SYSTEM_PROMPT))
             print("Task list:", task_list)
+
+            # Debugging: Print available agents
+            print("Available agents:", manager.get_agents_list())
             
-            # Käydään läpi tehtävät JSON-tehtävälistasta ja suoritetaan agentin kutsu
+            # Loop through task list and execute agent instructions
             for task in task_list.get("tasks", []):
                 agent_name = task["agent"]
                 instructions = task["instructions"]
                 
-                # Hakee agentin nimen perusteella
-                print("Looking for agent by name: ", agent_name)
+                # Find the agent by name
+                print("Looking for agent by name:", agent_name)
                 agent = manager.get_agent_by_name(agent_name)
                 
                 if agent:
+                    print("Agent found:", agent_name)
 
                     if agent_name == "timetable_agent":
                         print("Getting next class info")
-                        response_text = agent.get_next_class()  # timetable_agent hakee seuraavan luennon
+                        response_text = agent.get_next_class()  # timetable_agent function call
                         print("Response from agent:", response_text)
                         break
+                    
+                    elif agent_name == "menu_agent":
+                        print("Getting today's menu")
+                        response_text = agent.get_today_menu()  # menu_agent function call
+                        print("Response from agent:", response_text)
+                        break
+
                 else:
                     response_text = f"Agent {agent_name} ei ole tuettu."
 
@@ -85,8 +97,9 @@ def whatsapp_reply():
 
         # Twilio response        
         response = MessagingResponse()
-        response.message(response_text)  # Vain agentin palauttama teksti palautetaan käyttäjälle
+        response.message(response_text)
         return str(response)
+
 
 
 def print_public_ip():

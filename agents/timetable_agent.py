@@ -62,14 +62,8 @@ class TimetableAgent:
         except Exception as e:
             return f"Error processing timetable data: {str(e)}"
 
-def main():
-    """
-    Main function to execute TimetableAgent standalone and display the next lesson information.
-    """
+# Example usage
+if __name__ == "__main__":
     agent = TimetableAgent()
     next_class_info = agent.get_next_class()
     print(next_class_info)
-
-# Execute the main function if this file is run directly
-if __name__ == "__main__":
-    main()
