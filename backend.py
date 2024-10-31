@@ -1,16 +1,18 @@
+
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
-from agents import Agents 
+from manager import Manager 
 from chatgpt import interpret_prompt  # Tuodaan interpret_prompt chatgpt.py:stä
+import json
 
 app = Flask(__name__)
 
-agents = Agents()
+manager = Manager()
 
 # System-prompt definition: instructs ChatGPT API to interpret user prompt
 def generate_system_prompt():
-    agents_list = "\n".join([f"{i+1}. {agent['name']} - {agent['description']}" for i, agent in enumerate(agents.get_agents_list())])
+    agents_list = "\n".join([f"{i+1}. {agent['name']} - {agent['description']}" for i, agent in enumerate(manager.get_agents_list())])
     system_prompt = f"""
 Olet Sihteerin avustaja, joka osaa käyttää seuraavia agentteja:
 {agents_list}
@@ -43,8 +45,17 @@ def whatsapp_reply():
 
     response_text = ""
 
-    if incoming_msg == "list_agents":
-        agents_list = agents.get_agents_list()
+    # Direct handling for "score" command
+    if incoming_msg.startswith("score "):
+        task_name = incoming_msg[len("score "):].strip()
+        agent = manager.get_agent_by_name("assignments_agent")
+        response_text = agent.score(task_name)
+        response = MessagingResponse()
+        response.message(response_text)
+        return str(response)
+
+    elif incoming_msg == "list_agents":
+        agents_list = manager.get_agents_list()
         response_text = "Käytettävissä olevat agentit:\n" + "\n".join([f"{agent['name']} - {agent['description']}" for agent in agents_list])
         response = MessagingResponse()
         response.message(response_text)
@@ -54,10 +65,46 @@ def whatsapp_reply():
         return SYSTEM_PROMPT, 200
 
     else:
+        print("Processing user prompt:", incoming_msg)
         try:
-
             # Interpret user prompt with ChatGPT API
-            response_text = interpret_prompt(incoming_msg, SYSTEM_PROMPT)
+            task_list = json.loads(interpret_prompt(incoming_msg, SYSTEM_PROMPT))
+            print("Task list:", task_list)
+
+            # Debugging: Print available agents
+            print("Available agents:", manager.get_agents_list())
+            
+            # Loop through task list and execute agent instructions
+            for task in task_list.get("tasks", []):
+                agent_name = task["agent"]
+                instructions = task["instructions"]
+                
+                # Find the agent by name
+                print("Looking for agent by name:", agent_name)
+                agent = manager.get_agent_by_name(agent_name)
+                
+                if agent:
+                    print("Agent found:", agent_name)
+
+                    if agent_name == "timetable_agent":
+                        print("Getting next class info")
+                        response_text = agent.get_next_class()  # timetable_agent function call
+                        print("Response from agent:", response_text)
+                        break
+                    
+                    elif agent_name == "menu_agent":
+                        print("Getting today's menu")
+                        response_text = agent.get_today_menu()  # menu_agent function call
+                        print("Response from agent:", response_text)
+                        break
+
+                    elif agent_name == "assignments_agent":
+                        response_text = agent.get_upcoming_assignments()
+                        break
+
+                else:
+                    response_text = f"Agent {agent_name} ei ole tuettu."
+
         except Exception as e:
             response_text = f"Error processing your prompt: {str(e)}"
 
@@ -65,6 +112,8 @@ def whatsapp_reply():
         response = MessagingResponse()
         response.message(response_text)
         return str(response)
+
+
 
 def print_public_ip():
     try:
