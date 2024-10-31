@@ -45,7 +45,16 @@ def whatsapp_reply():
 
     response_text = ""
 
-    if incoming_msg == "list_agents":
+    # Direct handling for "score" command
+    if incoming_msg.startswith("score "):
+        task_name = incoming_msg[len("score "):].strip()
+        agent = manager.get_agent_by_name("assignments_agent")
+        response_text = agent.score(task_name)
+        response = MessagingResponse()
+        response.message(response_text)
+        return str(response)
+
+    elif incoming_msg == "list_agents":
         agents_list = manager.get_agents_list()
         response_text = "Käytettävissä olevat agentit:\n" + "\n".join([f"{agent['name']} - {agent['description']}" for agent in agents_list])
         response = MessagingResponse()
@@ -87,6 +96,10 @@ def whatsapp_reply():
                         print("Getting today's menu")
                         response_text = agent.get_today_menu()  # menu_agent function call
                         print("Response from agent:", response_text)
+                        break
+
+                    elif agent_name == "assignments_agent":
+                        response_text = agent.get_upcoming_assignments()
                         break
 
                 else:
