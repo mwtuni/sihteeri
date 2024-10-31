@@ -63,7 +63,7 @@ class RAGAgent:
 # Example Usage
 if __name__ == "__main__":
     agent = RAGAgent()
-    urls = ["http://127.0.0.1:8088/data.txt"]
+    urls = ["http://127.0.0.1:8088/menub.txt"]
     agent.setup_vectorstore(urls)
-    prompt = "Provide detailed information on the topic based on retrieved data."
+    prompt = "Provide detailed information on 31.10.2024 menu."
     print(agent.query(prompt))
