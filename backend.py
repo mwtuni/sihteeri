@@ -45,16 +45,7 @@ def whatsapp_reply():
 
     response_text = ""
 
-    # Direct handling for "score" command
-    if incoming_msg.startswith("score "):
-        task_name = incoming_msg[len("score "):].strip()
-        agent = manager.get_agent_by_name("assignments_agent")
-        response_text = agent.score(task_name)
-        response = MessagingResponse()
-        response.message(response_text)
-        return str(response)
-
-    elif incoming_msg == "list_agents":
+    if incoming_msg == "list_agents":
         agents_list = manager.get_agents_list()
         response_text = "Käytettävissä olevat agentit:\n" + "\n".join([f"{agent['name']} - {agent['description']}" for agent in agents_list])
         response = MessagingResponse()
@@ -104,10 +95,12 @@ def whatsapp_reply():
         except Exception as e:
             response_text = f"Error processing your prompt: {str(e)}"
 
-    # Twilio response        
-    response = MessagingResponse()
-    response.message(response_text)
-    return str(response)
+        # Twilio response        
+        response = MessagingResponse()
+        response.message(response_text)
+        return str(response)
+
+
 
 def print_public_ip():
     try:
