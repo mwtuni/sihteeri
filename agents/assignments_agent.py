@@ -150,7 +150,7 @@ class AssignmentsAgent:
         user_prompt = (
             f"Arvioi opiskelijan vastaus annetun tehtävän ohjeiden perusteella.\n\n"
             f"Tehtävä:\n{assignment_content}\n\nVastaus:\n{answer_content}\n\n"
-            "Anna arvosana asteikolla 1–5 ja yksityiskohtainen palaute. Anna lopuksi esimerkki täydellisestä vastauksesta."
+            "Anna arvosana asteikolla 1–5 ja yksityiskohtainen palaute. Anna lopuksi täydellinen esimerkkivastaus tehtävään."
         )
 
         # Call interpret_prompt from chatgpt.py and return the result

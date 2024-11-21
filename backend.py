@@ -46,7 +46,7 @@ def whatsapp_reply():
     response_text = ""
 
     # Direct handling for "score" command
-    if incoming_msg.startswith("score "):
+    if incoming_msg.startswith("score ") or incoming_msg.startswith("arvioi "):
         task_name = incoming_msg[len("score "):].strip()
         agent = manager.get_agent_by_name("assignments_agent")
         response_text = agent.score(task_name)
@@ -102,6 +102,10 @@ def whatsapp_reply():
                         response_text = agent.get_upcoming_assignments()
                         break
 
+                    elif agent_name == "haiku_agent":
+                        response_text = agent.haiku()
+                        break
+
                 else:
                     response_text = f"Agent {agent_name} ei ole tuettu."
 
@@ -109,8 +113,12 @@ def whatsapp_reply():
             response_text = f"Error processing your prompt: {str(e)}"
 
         # Twilio response        
+        #response = MessagingResponse()
+        #response.message(response_text)
+        #return str(response)
         response = MessagingResponse()
         response.message(response_text)
+        print("Twilio Response Body:", str(response))
         return str(response)
 
 
